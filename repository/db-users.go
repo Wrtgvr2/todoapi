@@ -6,7 +6,7 @@ import (
 )
 
 func GetUsers() ([]models.User, error) {
-	query := `SELECT id, username FROM users`
+	query := `SELECT id, username FROM users;`
 
 	rows, err := DB.Query(query)
 	if err != nil {
