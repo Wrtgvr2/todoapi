@@ -52,11 +52,12 @@ func TablesInit(DB *sql.DB) error {
 	);
 	CREATE TABLE IF NOT EXISTS todos (
 		id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-		user_id BIGINT NOT NULL FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE,
+		user_id BIGINT NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 		title VARCHAR(100) NOT NULL,
 		description TEXT,
 		completed BOOLEAN DEFAULT FALSE,
-		created_at
+		created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 	);`
 
 	if _, err := DB.Exec(createTables); err != nil {
