@@ -34,16 +34,18 @@ func OpenDatabase() error {
 		return err
 	}
 
-	defer DB.Close()
-
-	if err := TablesInit(DB); err != nil {
+	if err := tablesInit(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func TablesInit(DB *sql.DB) error {
+func CloseDatabase() {
+	DB.Close()
+}
+
+func tablesInit() error {
 	createTables := `
 	CREATE TABLE IF NOT EXISTS users (
 		id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

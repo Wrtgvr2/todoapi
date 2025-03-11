@@ -25,3 +25,7 @@ func InitApp() (*App, error) {
 		Router: router,
 	}, nil
 }
+
+func CloseApp() {
+	repository.CloseDatabase()
+}

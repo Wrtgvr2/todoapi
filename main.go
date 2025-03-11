@@ -13,6 +13,7 @@ func main() {
 		logger.LogError(err)
 		return
 	}
+	defer app.CloseApp()
 
 	http.ListenAndServe(":8080", App.Router)
 }
