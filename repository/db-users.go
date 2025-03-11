@@ -5,5 +5,5 @@ import (
 )
 
 func GetUsers() ([]models.User, error) {
-
+	return nil, nil
 }
