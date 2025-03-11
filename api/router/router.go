@@ -13,6 +13,7 @@ func NewRouter() http.Handler {
 
 	wrappedMux := mws.ChainMiddlewares(mux,
 		mws.LoggingMiddleware,
+		mws.SetHeaderJSON,
 	)
 
 	return wrappedMux
