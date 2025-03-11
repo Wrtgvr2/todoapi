@@ -12,7 +12,7 @@ func GetUsers() ([]models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close() // ??
+	defer rows.Close()
 
 	var users []models.User
 
