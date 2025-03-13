@@ -33,6 +33,10 @@ func LogsInit() {
 	log.SetLevel(logrus.InfoLevel)
 }
 
+func LogMessage(msg string) {
+	log.Info(msg)
+}
+
 func LogRequest(method, path string) {
 	log.Infof("[%s] %s", method, path)
 }
