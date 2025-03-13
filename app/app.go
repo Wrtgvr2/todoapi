@@ -21,11 +21,14 @@ func InitApp() (*App, error) {
 	}
 	router := router.NewRouter()
 
+	logger.LogMessage("Server started")
+
 	return &App{
 		Router: router,
 	}, nil
 }
 
 func CloseApp() {
+	logger.LogMessage("Server shutdown")
 	repository.CloseDatabase()
 }
