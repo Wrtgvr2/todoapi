@@ -7,6 +7,8 @@ import (
 	"github.com/wrtgvr/todoapi/internal/logger"
 )
 
+const port = ":8080"
+
 func main() {
 	App, err := app.InitApp()
 	if err != nil {
@@ -15,5 +17,5 @@ func main() {
 	}
 	defer app.CloseApp()
 
-	http.ListenAndServe(":8080", App.Router)
+	http.ListenAndServe(port, App.Router)
 }
