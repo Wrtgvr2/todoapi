@@ -80,6 +80,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
 			return
 		}
+		logger.LogError(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
