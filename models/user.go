@@ -1,11 +1,11 @@
 package models
 
 type UserResponse struct {
-	ID       uint64
-	Username string
+	ID       uint64 `json:"id"`
+	Username string `json:"username"`
 }
 
 type UserRequest struct {
-	Username string
-	Password string
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
