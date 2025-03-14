@@ -1,8 +1,8 @@
 package models
 
 type UserResponse struct {
-	Username string
 	ID       uint64
+	Username string
 }
 
 type UserRequest struct {
