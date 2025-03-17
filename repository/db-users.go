@@ -2,12 +2,39 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 
 	_ "github.com/lib/pq"
 	"github.com/wrtgvr/todoapi/models"
 )
+
+func UpdateUser(newUserData *models.User) (*models.UserResponse, error) {
+	query := `UPDATE users SET username=$1, password=$2 WHERE id=$3 RETURNING id, username`
+	user := models.UserResponse{}
+
+	err := DB.QueryRow(query, strings.ToLower(newUserData.Username), newUserData.Password, newUserData.ID).Scan(&user.ID, &user.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &ErrUserNotFound{}
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetFullUser(id uint64) (*models.User, error) {
+	user := &models.User{}
+
+	query := `SELECT id, username, password FROM users WHERE id=$1`
+
+	err := DB.QueryRow(query, id).Scan(user.ID, user.Username, user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
 
 func CreateUser(userData models.UserRequest) (*models.UserResponse, error) {
 	var user models.UserResponse
@@ -35,7 +62,7 @@ func GetUserByUsername(username string) (*models.UserResponse, error) {
 
 	if err := row.Scan(&user.ID, &user.Username); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, &ErrUserNotFound{}
 		}
 		return nil, err
 	}
@@ -52,10 +79,8 @@ func GetUserById(id uint64) (*models.UserResponse, error) {
 
 	if err := row.Scan(&user.ID, &user.Username); err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Print(4)
-			return nil, &ErrUserNotFound{RequestedID: id}
+			return nil, &ErrUserNotFound{}
 		}
-		fmt.Print(5)
 		return nil, err
 	}
 
