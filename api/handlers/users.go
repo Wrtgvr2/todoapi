@@ -12,7 +12,7 @@ import (
 	rep "github.com/wrtgvr/todoapi/repository"
 )
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
 	if idStr == "" {
 		http.Error(w, "User ID is required", http.StatusBadRequest)
@@ -21,6 +21,30 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		fmt.Println(id)
+		http.Error(w, "Invalid User ID", http.StatusBadRequest)
+		return
+	}
+
+	err = rep.Delete(id)
+	if err != nil {
+		if notFoundErr, ok := err.(*rep.ErrUserNotFound); ok {
+			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
+	if idStr == "" {
+		http.Error(w, "User ID is required", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
 		http.Error(w, "Invalid User ID", http.StatusBadRequest)
 		return
 	}

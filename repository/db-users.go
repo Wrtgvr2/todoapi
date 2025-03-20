@@ -8,6 +8,17 @@ import (
 	"github.com/wrtgvr/todoapi/models"
 )
 
+func Delete(id uint64) error {
+	query := `DELETE FROM users WHERE id=$1`
+
+	err := DB.QueryRow(query, id).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func UpdateUser(newUserData *models.User) (*models.UserResponse, error) {
 	query := `UPDATE users SET username=$1, password=$2 WHERE id=$3 RETURNING id, username`
 	user := models.UserResponse{}
