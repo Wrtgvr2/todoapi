@@ -47,7 +47,7 @@ func GetFullUser(id uint64) (*models.User, error) {
 	return user, nil
 }
 
-func CreateUser(userData models.UserRequest) (*models.UserResponse, error) {
+func CreateUser(userData *models.UserRequest) (*models.UserResponse, error) {
 	var user models.UserResponse
 	query := `
 	INSERT INTO users(username, password)
