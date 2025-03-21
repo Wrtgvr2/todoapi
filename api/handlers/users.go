@@ -131,7 +131,7 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdUser, err := rep.CreateUser(newUserData)
+	createdUser, err := rep.CreateUser(&newUserData)
 	if err != nil {
 		logger.LogError(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
