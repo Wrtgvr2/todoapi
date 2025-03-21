@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type ToDo struct {
+type Todo struct {
 	ID          uint64    `json:"id"`
 	User_ID     uint64    `json:"userid"`
 	Title       string    `json:"title"`
