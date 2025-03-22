@@ -3,8 +3,8 @@ package models
 import "time"
 
 type CreateTodoData struct {
-	UserID      uint64 `json:"user_id"`
-	Title       string `json:"title"`
+	UserID      uint64 `json:"user_id,omitempty"`
+	Title       string `json:"title,omitempty"`
 	Description string `json:"description,omitempty"`
 }
 
