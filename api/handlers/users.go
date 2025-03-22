@@ -104,8 +104,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var newUserData models.UserRequest
 
-	err := json.NewDecoder(r.Body).Decode(&newUserData)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&newUserData); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -119,15 +118,13 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := rep.GetUserByUsername(newUserData.Username)
+	_, err := rep.GetUserByUsername(newUserData.Username)
 	if err != nil {
-		if _, ok := err.(*rep.ErrUserNotFound); !ok {
-			HandleInternalError(w, err)
+		if notFoundErr, ok := err.(*rep.ErrUserNotFound); ok {
+			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
 			return
 		}
-	}
-	if user != nil {
-		http.Error(w, "Username already taken", http.StatusConflict)
+		HandleInternalError(w, err)
 		return
 	}
 
