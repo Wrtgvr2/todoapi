@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wrtgvr/todoapi/internal/logger"
 	"github.com/wrtgvr/todoapi/models"
 	rep "github.com/wrtgvr/todoapi/repository"
 )
@@ -31,7 +30,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
 			return
 		}
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		HandleInternalError(w, err)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -62,7 +61,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
 			return
 		}
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		HandleInternalError(w, err)
 		return
 	}
 
@@ -78,7 +77,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	userWithSameUsername, err := rep.GetUserByUsername(updateData.Username)
 	if err != nil {
 		if _, ok := err.(*rep.ErrUserNotFound); !ok {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			HandleInternalError(w, err)
 			return
 		}
 	}
@@ -95,7 +94,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	updatedUser, err := rep.UpdateUser(&updatedUserData)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		HandleInternalError(w, err)
 		return
 	}
 
@@ -123,8 +122,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	user, err := rep.GetUserByUsername(newUserData.Username)
 	if err != nil {
 		if _, ok := err.(*rep.ErrUserNotFound); !ok {
-			logger.LogError(err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			HandleInternalError(w, err)
 			return
 		}
 	}
@@ -135,14 +133,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, err := rep.CreateUser(&newUserData)
 	if err != nil {
-		logger.LogError(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		HandleInternalError(w, err)
 		return
 	}
 	json, jsonErr := json.Marshal(createdUser)
 	if jsonErr != nil {
-		logger.LogError(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		HandleInternalError(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -168,8 +164,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
 			return
 		}
-		logger.LogError(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		HandleInternalError(w, err)
 		return
 	}
 
@@ -179,8 +174,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	res, err := rep.GetUsers()
 	if err != nil {
-		logger.LogError(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		HandleInternalError(w, err)
 		return
 	}
 
