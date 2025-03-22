@@ -102,7 +102,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedUser)
 }
 
-func PostUser(w http.ResponseWriter, r *http.Request) {
+func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var newUserData models.UserRequest
 
 	err := json.NewDecoder(r.Body).Decode(&newUserData)
@@ -122,9 +122,11 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := rep.GetUserByUsername(newUserData.Username)
 	if err != nil {
-		logger.LogError(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+		if _, ok := err.(*rep.ErrUserNotFound); !ok {
+			logger.LogError(err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 	}
 	if user != nil {
 		http.Error(w, "Username already taken", http.StatusConflict)
