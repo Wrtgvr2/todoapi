@@ -10,6 +10,7 @@ func NewRouter() http.Handler {
 	mux := http.NewServeMux()
 
 	RegisterUsersRoutes(mux)
+	RegisterTodosRoutes(mux)
 
 	wrappedMux := mws.ChainMiddlewares(mux,
 		mws.LoggingMiddleware,
