@@ -3,11 +3,36 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/wrtgvr/todoapi/models"
 	rep "github.com/wrtgvr/todoapi/repository"
 )
+
+func GetTodo(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
+	if idStr == "" {
+		http.Error(w, "User ID is required", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	todo, err := rep.GetTodo(id)
+	if err != nil {
+		if notFoundErr, ok := err.(*rep.ErrTodoNotFound); ok {
+			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
+			return
+		}
+		HandleInternalError(w, err)
+	}
+
+	json.NewEncoder(w).Encode(todo)
+}
 
 func GetTodos(w http.ResponseWriter, r *http.Request) {
 	todos, err := rep.GetTodos()

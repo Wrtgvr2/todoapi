@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+
 	_ "github.com/lib/pq"
 	"github.com/wrtgvr/todoapi/models"
 )
@@ -13,8 +15,30 @@ Description string    `json:"description"`
 Completed   bool      `json:"completed"`
 Created_At   time.Time `json:"createdat"`
 */
+func GetTodo(id uint64) (*models.Todo, error) {
+	query := `SELECT * FROM todos WHERE id=$1`
+
+	var todo models.Todo
+
+	if err := DB.QueryRow(query, id).Scan(
+		&todo.ID,
+		&todo.User_ID,
+		&todo.Title,
+		&todo.Description,
+		&todo.Completed,
+		&todo.Created_At,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &ErrTodoNotFound{}
+		}
+		return nil, err
+	}
+
+	return &todo, nil
+}
+
 func GetTodos() ([]models.Todo, error) {
-	query := `SELECT * from todos;`
+	query := `SELECT * FROM todos;`
 
 	rows, err := DB.Query(query)
 	if err != nil {

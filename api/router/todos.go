@@ -8,5 +8,6 @@ import (
 
 func RegisterTodosRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /todos", handlers.GetTodos)
+	mux.HandleFunc("GET /todos/", handlers.GetTodo)
 	mux.HandleFunc("POST /todos", handlers.CreateTodo)
 }
