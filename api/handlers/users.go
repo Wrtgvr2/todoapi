@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,7 +18,6 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		fmt.Println(id)
 		http.Error(w, "Invalid User ID", http.StatusBadRequest)
 		return
 	}
