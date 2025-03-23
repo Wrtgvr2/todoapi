@@ -9,6 +9,17 @@ import (
 	rep "github.com/wrtgvr/todoapi/repository"
 )
 
+func GetTodos(w http.ResponseWriter, r *http.Request) {
+	todos, err := rep.GetTodos()
+	if err != nil {
+		HandleInternalError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(todos)
+}
+
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	var bodyData models.CreateTodoData
 
