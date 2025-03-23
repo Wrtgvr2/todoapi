@@ -18,7 +18,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		http.Error(w, "Invalid User ID", http.StatusBadRequest)
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
