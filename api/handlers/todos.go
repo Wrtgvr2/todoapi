@@ -10,6 +10,31 @@ import (
 	rep "github.com/wrtgvr/todoapi/repository"
 )
 
+func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
+	if idStr == "" {
+		http.Error(w, "User ID is required", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	err = rep.DeleteTodo(id)
+	if err != nil {
+		if notFoundErr, ok := err.(*rep.ErrTodoNotFound); ok {
+			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
+			return
+		}
+		HandleInternalError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func GetTodo(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
 	if idStr == "" {
