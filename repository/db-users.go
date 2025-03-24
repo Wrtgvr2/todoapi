@@ -8,11 +8,14 @@ import (
 	"github.com/wrtgvr/todoapi/models"
 )
 
-func Delete(id uint64) error {
+func DeleteUser(id uint64) error {
 	query := `DELETE FROM users WHERE id=$1`
 
 	err := DB.QueryRow(query, id).Err()
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return &ErrUserNotFound{}
+		}
 		return err
 	}
 
@@ -41,6 +44,9 @@ func GetFullUser(id uint64) (*models.User, error) {
 
 	err := DB.QueryRow(query, id).Scan(user.ID, user.Username, user.Password)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &ErrUserNotFound{}
+		}
 		return nil, err
 	}
 

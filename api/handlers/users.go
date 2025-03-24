@@ -22,7 +22,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = rep.Delete(id)
+	err = rep.DeleteUser(id)
 	if err != nil {
 		if notFoundErr, ok := err.(*rep.ErrUserNotFound); ok {
 			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
