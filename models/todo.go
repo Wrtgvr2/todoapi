@@ -2,6 +2,12 @@ package models
 
 import "time"
 
+type UpdateTodoData struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Completed   bool   `json:"completed"`
+}
+
 type CreateTodoData struct {
 	User_ID     uint64 `json:"user_id,omitempty"`
 	Title       string `json:"title,omitempty"`

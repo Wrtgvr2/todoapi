@@ -14,8 +14,11 @@ Title       string    `json:"title"`
 Description string    `json:"description"`
 Completed   bool      `json:"completed"`
 Created_At   time.Time `json:"createdat"`
-Delete, Update
 */
+
+func UpdateTodo(id uint64) error {
+	var todoData models.UpdateTodoData
+}
 
 func DeleteTodo(id uint64) error {
 	query := `DELETE FROM todos WHERE id=$1`
