@@ -13,12 +13,30 @@ User_ID     uint64    `json:"userid"`
 Title       string    `json:"title"`
 Description string    `json:"description"`
 Completed   bool      `json:"completed"`
-Created_At   time.Time `json:"createdat"`
+Created_At  time.Time `json:"createdat"`
 */
 
-// func UpdateTodo(id uint64, updateData models.UpdateTodoData) (models.Todo, error) {
+func UpdateTodo(id uint64, updateData *models.UpdateTodoData) (*models.Todo, error) {
+	query := `UPDATE todos SET title=$1, description=$2, completed=$3 WHERE id=$4 RETURNING *`
+	todo := models.Todo{}
 
-// }
+	err := DB.QueryRow(query, updateData.Title, updateData.Description, updateData.Completed, id).Scan(
+		&todo.ID,
+		&todo.User_ID,
+		&todo.Title,
+		&todo.Description,
+		&todo.Completed,
+		&todo.Created_At,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &ErrTodoNotFound{}
+		}
+		return nil, err
+	}
+
+	return &todo, nil
+}
 
 func DeleteTodo(id uint64) error {
 	query := `DELETE FROM todos WHERE id=$1`
@@ -89,7 +107,7 @@ func GetTodos() ([]models.Todo, error) {
 	return todos, nil
 }
 
-func CreateToDo(TodoData models.CreateTodoData) (*models.Todo, error) {
+func CreateToDo(TodoData *models.CreateTodoData) (*models.Todo, error) {
 	var todo models.Todo
 	query := `
 	INSERT INTO todos(user_id, title, description)

@@ -3,23 +3,23 @@ package models
 import "time"
 
 type UpdateTodoData struct {
-	ID          uint64 `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Completed   bool   `json:"completed"`
+	ID          uint64  `json:"id"`
+	Title       *string `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Completed   *bool   `json:"completed,omitempty"`
 }
 
 type CreateTodoData struct {
-	User_ID     uint64 `json:"user_id,omitempty"`
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
+	User_ID     uint64  `json:"user_id"`
+	Title       string  `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
 }
 
 type Todo struct {
 	ID          uint64    `json:"id"`
 	User_ID     uint64    `json:"user_id"`
 	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Completed   bool      `json:"completed"`
+	Description *string   `json:"description"`
+	Completed   *bool     `json:"completed"`
 	Created_At  time.Time `json:"createdat"`
 }
