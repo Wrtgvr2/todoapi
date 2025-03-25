@@ -37,22 +37,6 @@ func UpdateUser(newUserData *models.User) (*models.UserResponse, error) {
 	return &user, nil
 }
 
-func GetFullUser(id uint64) (*models.User, error) {
-	user := &models.User{}
-
-	query := `SELECT id, username, password FROM users WHERE id=$1`
-
-	err := DB.QueryRow(query, id).Scan(user.ID, user.Username, user.Password)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, &ErrUserNotFound{}
-		}
-		return nil, err
-	}
-
-	return user, nil
-}
-
 func CreateUser(userData *models.UserRequest) (*models.UserResponse, error) {
 	var user models.UserResponse
 	query := `
