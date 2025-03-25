@@ -118,12 +118,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err := rep.GetUserByUsername(newUserData.Username)
 	if err != nil {
-		if _, ok := err.(*rep.ErrUserNotFound); ok {
-			http.Error(w, "Username already taken", http.StatusConflict)
+		if _, ok := err.(*rep.ErrUserNotFound); !ok {
+			HandleInternalError(w, err)
 			return
 		}
-		HandleInternalError(w, err)
-		return
 	}
 
 	createdUser, err := rep.CreateUser(&newUserData)
