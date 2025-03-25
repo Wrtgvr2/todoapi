@@ -16,15 +16,18 @@ Completed   bool      `json:"completed"`
 Created_At   time.Time `json:"createdat"`
 */
 
-func UpdateTodo(id uint64, updateData models.UpdateTodoData) (models.Todo, error) {
+// func UpdateTodo(id uint64, updateData models.UpdateTodoData) (models.Todo, error) {
 
-}
+// }
 
 func DeleteTodo(id uint64) error {
 	query := `DELETE FROM todos WHERE id=$1`
 
 	err := DB.QueryRow(query, id).Err()
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return &ErrTodoNotFound{}
+		}
 		return err
 	}
 
