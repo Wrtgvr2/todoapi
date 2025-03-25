@@ -16,8 +16,8 @@ Completed   bool      `json:"completed"`
 Created_At   time.Time `json:"createdat"`
 */
 
-func UpdateTodo(id uint64) error {
-	var todoData models.UpdateTodoData
+func UpdateTodo(id uint64, updateData models.UpdateTodoData) (models.Todo, error) {
+
 }
 
 func DeleteTodo(id uint64) error {

@@ -49,7 +49,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateData models.UserRequest
 	err = json.NewDecoder(r.Body).Decode(&updateData)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, ErrInvalidJSON{}.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -103,7 +103,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var newUserData models.UserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&newUserData); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, ErrInvalidJSON{}.Error(), http.StatusBadRequest)
 		return
 	}
 

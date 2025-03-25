@@ -74,7 +74,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	var bodyData models.CreateTodoData
 
 	if err := json.NewDecoder(r.Body).Decode(&bodyData); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, ErrInvalidJSON{}.Error(), http.StatusBadRequest)
 		return
 	}
 
