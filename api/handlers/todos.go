@@ -13,7 +13,7 @@ import (
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
 	if idStr == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
+		http.Error(w, "Todo ID is required", http.StatusBadRequest)
 		return
 	}
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -38,7 +38,7 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 func GetTodo(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
 	if idStr == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
+		http.Error(w, "Todo ID is required", http.StatusBadRequest)
 		return
 	}
 	id, err := strconv.ParseUint(idStr, 10, 64)
