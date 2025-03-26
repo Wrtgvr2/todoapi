@@ -63,16 +63,16 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(updateData.Username) < 6 {
+	if len(*updateData.Username) < 6 && updateData.Username != nil {
 		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
 		return
 	}
-	if len(updateData.Password) < 8 {
+	if len(*updateData.Password) < 8 && updateData.Password != nil {
 		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
 		return
 	}
 
-	userWithSameUsername, err := rep.GetUserByUsername(updateData.Username)
+	userWithSameUsername, err := rep.GetUserByUsername(*updateData.Username)
 	if err != nil {
 		if _, ok := err.(*rep.ErrUserNotFound); !ok {
 			HandleInternalError(w, err)
@@ -86,8 +86,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	updatedUserData := models.User{
 		ID:       id,
-		Username: updateData.Username,
-		Password: updateData.Username,
+		Username: *updateData.Username,
+		Password: *updateData.Username,
 	}
 
 	updatedUser, err := rep.UpdateUser(&updatedUserData)
@@ -107,16 +107,16 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if newUserData.Username == "" || len(newUserData.Username) < 6 {
+	if *newUserData.Username == "" || len(*newUserData.Username) < 6 {
 		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
 		return
 	}
-	if newUserData.Password == "" || len(newUserData.Password) < 8 {
+	if *newUserData.Password == "" || len(*newUserData.Password) < 8 {
 		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
 		return
 	}
 
-	_, err := rep.GetUserByUsername(newUserData.Username)
+	_, err := rep.GetUserByUsername(*newUserData.Username)
 	if err != nil {
 		if _, ok := err.(*rep.ErrUserNotFound); !ok {
 			HandleInternalError(w, err)

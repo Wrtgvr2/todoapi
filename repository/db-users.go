@@ -45,7 +45,7 @@ func CreateUser(userData *models.UserRequest) (*models.UserResponse, error) {
 	RETURNING id, username;
 	`
 
-	err := DB.QueryRow(query, strings.ToLower(userData.Username), userData.Password).Scan(&user.ID, &user.Username)
+	err := DB.QueryRow(query, strings.ToLower(*userData.Username), userData.Password).Scan(&user.ID, &user.Username)
 	if err != nil {
 		return nil, err
 	}
