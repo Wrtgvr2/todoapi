@@ -53,7 +53,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingUser, err := rep.GetUserById(id)
+	existingUser, err := rep.GetFullUser(id)
 	if err != nil {
 		if notFoundErr, ok := err.(*rep.ErrUserNotFound); ok {
 			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
@@ -63,11 +63,27 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(*updateData.Username) < 6 && updateData.Username != nil {
+	var updatedUserData models.User
+
+	updatedUserData.ID = id
+
+	if updateData.Username == nil {
+		updatedUserData.Username = existingUser.Username
+	} else {
+		updatedUserData.Username = *updateData.Username
+	}
+
+	if updateData.Password == nil {
+		updatedUserData.Password = existingUser.Password
+	} else {
+		updatedUserData.Password = *updateData.Password
+	}
+
+	if updateData.Username != nil && len(updatedUserData.Username) < 6 {
 		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
 		return
 	}
-	if len(*updateData.Password) < 8 && updateData.Password != nil {
+	if updateData.Password != nil && len(updatedUserData.Password) < 8 {
 		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
 		return
 	}
@@ -82,12 +98,6 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if userWithSameUsername != nil && userWithSameUsername.ID != existingUser.ID {
 		http.Error(w, "Username already taken", http.StatusConflict)
 		return
-	}
-
-	updatedUserData := models.User{
-		ID:       id,
-		Username: *updateData.Username,
-		Password: *updateData.Username,
 	}
 
 	updatedUser, err := rep.UpdateUser(&updatedUserData)
