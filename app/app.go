@@ -13,7 +13,7 @@ type App struct {
 }
 
 func InitApp() (*App, error) {
-	logger.LogsInit()
+	logger.InitLogs()
 
 	errDb := repository.OpenDatabase()
 	if errDb != nil {
@@ -30,5 +30,6 @@ func InitApp() (*App, error) {
 
 func CloseApp() {
 	logger.LogMessage("Server shutdown")
+	logger.CloseLogs()
 	repository.CloseDatabase()
 }

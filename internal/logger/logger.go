@@ -1,53 +1,140 @@
 package logger
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
+	"strconv"
 	"time"
-
-	"github.com/sirupsen/logrus"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-var log *logrus.Logger
+var logsPath = "./logs"
+var logFile *os.File
+var maxLogFiles = 5
 
-func LogsInit() {
-	log = logrus.New()
-
+func InitLogs() {
 	date := time.Now().Format("2006-01-02")
-	filename := fmt.Sprintf("logs/%s-log.txt", date)
+	filename := fmt.Sprintf("logs/%s-log", date)
 
-	for i := 1; fileExists(filename); i++ {
-		filename = fmt.Sprintf("logs/%s-log-%d.txt", date, i)
+	maxSuffix := getLogFileMaxSuffix()
+	if maxSuffix >= 0 {
+		filename = fmt.Sprintf("%s-%d", filename, maxSuffix+1)
 	}
 
-	log.SetOutput(&lumberjack.Logger{
-		Filename:   filename,
-		MaxSize:    20,
-		MaxAge:     3,
-		MaxBackups: 5,
-	})
+	filename = fmt.Sprintf("%s.%s", filename, "txt")
 
-	log.SetFormatter(&logrus.JSONFormatter{})
-	log.SetLevel(logrus.InfoLevel)
+	var err error
+	logFile, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	for countLogFiles() > maxLogFiles {
+		os.Remove(getOldestLogFilePath())
+	}
+}
+
+func CloseLogs() {
+	err := logFile.Close()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func LogMessage(msg string) {
-	log.Info(msg)
+	writeLog(msg, "Message")
 }
 
 func LogRequest(method, path string) {
-	log.Infof("[%s] %s", method, path)
+	text := fmt.Sprintf("[%s] %s", method, path)
+	writeLog(text, "Request")
 }
 
 func LogError(err error) {
 	if err != nil {
-		log.Errorf("Error: %v", err)
+		writeLog(err.Error(), "Error")
 	}
 }
 
-func fileExists(filename string) bool {
-	_, err := os.Stat(filename)
-	return !errors.Is(err, os.ErrNotExist)
+func getLogFileMaxSuffix() int {
+	maxSuffix := -1
+	r := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}-log(?:-(\d+))?\.txt$`)
+
+	files, err := os.ReadDir(logsPath)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, file := range files {
+		match := r.FindStringSubmatch(file.Name())
+		if len(match) > 1 && match[1] != "" {
+			suffix, err := strconv.Atoi(match[1])
+			if err != nil {
+				panic(err)
+			}
+			if suffix > maxSuffix {
+				maxSuffix = suffix
+			}
+		}
+	}
+
+	if maxSuffix == -1 {
+		maxSuffix = 0
+	}
+
+	return maxSuffix
+}
+
+func getOldestLogFilePath() string {
+	files, err := os.ReadDir(logsPath)
+	if err != nil {
+		panic(err)
+	}
+
+	var oldestFilePath string
+	var oldestTime time.Time
+
+	for _, file := range files {
+		filePath := fmt.Sprintf("%s/%s", logsPath, file.Name())
+
+		info, err := os.Stat(filePath)
+		if err != nil {
+			continue
+		}
+
+		if oldestFilePath == "" || info.ModTime().Before(oldestTime) {
+			oldestFilePath = filePath
+			oldestTime = info.ModTime()
+		}
+	}
+
+	return oldestFilePath
+}
+
+func countLogFiles() int {
+	files, err := os.ReadDir(logsPath)
+	if err != nil {
+		panic(err)
+	}
+
+	return len(files)
+}
+
+func writeLog(text, logType string) {
+	logMsg := map[string]string{
+		"type": logType,
+		"text": text,
+		"date": time.Now().Format("Jan 2006-01-02 15-04-05"),
+	}
+
+	json, err := json.Marshal(logMsg)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = logFile.Write(json)
+	if err != nil {
+		panic(err)
+	}
 }
