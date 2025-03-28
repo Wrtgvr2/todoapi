@@ -5,7 +5,7 @@ import (
 
 	"github.com/wrtgvr/todoapi/api/router"
 	"github.com/wrtgvr/todoapi/internal/logger"
-	"github.com/wrtgvr/todoapi/repository"
+	rep "github.com/wrtgvr/todoapi/repository"
 )
 
 type App struct {
@@ -15,7 +15,7 @@ type App struct {
 func InitApp() (*App, error) {
 	logger.InitLogs()
 
-	errDb := repository.OpenDatabase()
+	errDb := rep.OpenDatabase()
 	if errDb != nil {
 		return nil, errDb
 	}
@@ -31,5 +31,5 @@ func InitApp() (*App, error) {
 func CloseApp() {
 	logger.LogMessage("Server shutdown")
 	logger.CloseLogs()
-	repository.CloseDatabase()
+	rep.CloseDatabase()
 }
