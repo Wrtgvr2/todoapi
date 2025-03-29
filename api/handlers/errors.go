@@ -1,20 +1,15 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/wrtgvr/todoapi/internal/logger"
 )
 
-type error interface {
-	Error() string
-}
-
-type ErrInvalidJSON struct{}
-
-func (e ErrInvalidJSON) Error() string {
-	return "Invalid JSON"
-}
+var (
+	ErrInvalidJSON = errors.New("invalid json")
+)
 
 func HandleInternalError(w http.ResponseWriter, err error) {
 	logger.LogError(err)

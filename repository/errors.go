@@ -1,17 +1,8 @@
 package repository
 
-type error interface {
-	Error() string
-}
+import "errors"
 
-type ErrUserNotFound struct{}
-
-func (e *ErrUserNotFound) Error() string {
-	return "User not found."
-}
-
-type ErrTodoNotFound struct{}
-
-func (e *ErrTodoNotFound) Error() string {
-	return "Todo not found."
-}
+var (
+	ErrUserNotFound = errors.New("User not found.")
+	ErrTodoNotFound = errors.New("Todo not found.")
+)

@@ -7,15 +7,6 @@ import (
 	"github.com/wrtgvr/todoapi/models"
 )
 
-/*
-ID          uint64    `json:"id"`
-User_ID     uint64    `json:"userid"`
-Title       string    `json:"title"`
-Description string    `json:"description"`
-Completed   bool      `json:"completed"`
-Created_At  time.Time `json:"createdat"`
-*/
-
 func UpdateTodo(id uint64, updateData *models.UpdateTodoData) (*models.Todo, error) {
 	query := `UPDATE todos SET title=$1, description=$2, completed=$3 WHERE id=$4 RETURNING *`
 	todo := models.Todo{}
@@ -30,7 +21,7 @@ func UpdateTodo(id uint64, updateData *models.UpdateTodoData) (*models.Todo, err
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, &ErrTodoNotFound{}
+			return nil, ErrTodoNotFound
 		}
 		return nil, err
 	}
@@ -44,7 +35,7 @@ func DeleteTodo(id uint64) error {
 	err := DB.QueryRow(query, id).Err()
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return &ErrTodoNotFound{}
+			return ErrTodoNotFound
 		}
 		return err
 	}
@@ -66,7 +57,7 @@ func GetTodo(id uint64) (*models.Todo, error) {
 		&todo.Created_At,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, &ErrTodoNotFound{}
+			return nil, ErrTodoNotFound
 		}
 		return nil, err
 	}
