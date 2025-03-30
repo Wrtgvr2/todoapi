@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,7 +11,7 @@ import (
 	rep "github.com/wrtgvr/todoapi/repository"
 )
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
 	if idStr == "" {
 		http.Error(w, "User ID is required", http.StatusBadRequest)
@@ -22,10 +23,10 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = rep.DeleteUser(id)
+	err = h.UserRepo.DeleteUser(id)
 	if err != nil {
-		if notFoundErr, ok := err.(*rep.ErrUserNotFound); ok {
-			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
+		if errors.Is(err, rep.ErrUserNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		HandleInternalError(w, err)
@@ -34,7 +35,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
 	if idStr == "" {
 		http.Error(w, "User ID is required", http.StatusBadRequest)
@@ -49,14 +50,14 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateData models.UserRequest
 	err = json.NewDecoder(r.Body).Decode(&updateData)
 	if err != nil {
-		http.Error(w, ErrInvalidJSON{}.Error(), http.StatusBadRequest)
+		http.Error(w, ErrInvalidJSON.Error(), http.StatusBadRequest)
 		return
 	}
 
-	existingUser, err := rep.GetFullUser(id)
+	existingUser, err := h.UserRepo.GetFullUser(id)
 	if err != nil {
-		if notFoundErr, ok := err.(*rep.ErrUserNotFound); ok {
-			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
+		if errors.Is(err, rep.ErrUserNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		HandleInternalError(w, err)
@@ -88,10 +89,10 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userWithSameUsername, err := rep.GetUserByUsername(*updateData.Username)
+	userWithSameUsername, err := h.UserRepo.GetUserByUsername(*updateData.Username)
 	if err != nil {
-		if _, ok := err.(*rep.ErrUserNotFound); !ok {
-			HandleInternalError(w, err)
+		if errors.Is(err, rep.ErrUserNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 	}
@@ -100,7 +101,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedUser, err := rep.UpdateUser(&updatedUserData)
+	updatedUser, err := h.UserRepo.UpdateUser(&updatedUserData)
 	if err != nil {
 		HandleInternalError(w, err)
 		return
@@ -109,11 +110,11 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedUser)
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var newUserData models.UserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&newUserData); err != nil {
-		http.Error(w, ErrInvalidJSON{}.Error(), http.StatusBadRequest)
+		http.Error(w, ErrInvalidJSON.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -126,15 +127,15 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := rep.GetUserByUsername(*newUserData.Username)
+	_, err := h.UserRepo.GetUserByUsername(*newUserData.Username)
 	if err != nil {
-		if _, ok := err.(*rep.ErrUserNotFound); !ok {
+		if !errors.Is(err, rep.ErrUserNotFound) {
 			HandleInternalError(w, err)
 			return
 		}
 	}
 
-	createdUser, err := rep.CreateUser(&newUserData)
+	createdUser, err := h.UserRepo.CreateUser(&newUserData)
 	if err != nil {
 		HandleInternalError(w, err)
 		return
@@ -148,7 +149,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(json)
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
 
 	if idStr == "" {
@@ -161,10 +162,10 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := rep.GetUserById(id)
+	user, err := h.UserRepo.GetUserById(id)
 	if err != nil {
-		if notFoundErr, ok := err.(*rep.ErrUserNotFound); ok {
-			http.Error(w, notFoundErr.Error(), http.StatusNotFound)
+		if errors.Is(err, rep.ErrUserNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		HandleInternalError(w, err)
@@ -174,8 +175,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func GetUsers(w http.ResponseWriter, r *http.Request) {
-	res, err := rep.GetUsers()
+func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	res, err := h.UserRepo.GetUsers()
 	if err != nil {
 		HandleInternalError(w, err)
 		return

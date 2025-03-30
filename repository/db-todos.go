@@ -7,11 +7,15 @@ import (
 	"github.com/wrtgvr/todoapi/models"
 )
 
-func UpdateTodo(id uint64, updateData *models.UpdateTodoData) (*models.Todo, error) {
+type PostgresTodoRepo struct {
+	DB *sql.DB
+}
+
+func (p *PostgresTodoRepo) UpdateTodo(id uint64, updateData *models.UpdateTodoData) (*models.Todo, error) {
 	query := `UPDATE todos SET title=$1, description=$2, completed=$3 WHERE id=$4 RETURNING *`
 	todo := models.Todo{}
 
-	err := DB.QueryRow(query, updateData.Title, updateData.Description, updateData.Completed, id).Scan(
+	err := p.DB.QueryRow(query, updateData.Title, updateData.Description, updateData.Completed, id).Scan(
 		&todo.ID,
 		&todo.User_ID,
 		&todo.Title,
@@ -29,10 +33,10 @@ func UpdateTodo(id uint64, updateData *models.UpdateTodoData) (*models.Todo, err
 	return &todo, nil
 }
 
-func DeleteTodo(id uint64) error {
+func (p *PostgresTodoRepo) DeleteTodo(id uint64) error {
 	query := `DELETE FROM todos WHERE id=$1`
 
-	err := DB.QueryRow(query, id).Err()
+	err := p.DB.QueryRow(query, id).Err()
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return ErrTodoNotFound
@@ -43,12 +47,12 @@ func DeleteTodo(id uint64) error {
 	return nil
 }
 
-func GetTodo(id uint64) (*models.Todo, error) {
+func (p *PostgresTodoRepo) GetTodo(id uint64) (*models.Todo, error) {
 	query := `SELECT * FROM todos WHERE id=$1`
 
 	var todo models.Todo
 
-	if err := DB.QueryRow(query, id).Scan(
+	if err := p.DB.QueryRow(query, id).Scan(
 		&todo.ID,
 		&todo.User_ID,
 		&todo.Title,
@@ -65,10 +69,10 @@ func GetTodo(id uint64) (*models.Todo, error) {
 	return &todo, nil
 }
 
-func GetTodos() ([]models.Todo, error) {
+func (p *PostgresTodoRepo) GetTodos() ([]models.Todo, error) {
 	query := `SELECT * FROM todos;`
 
-	rows, err := DB.Query(query)
+	rows, err := p.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +102,7 @@ func GetTodos() ([]models.Todo, error) {
 	return todos, nil
 }
 
-func CreateToDo(TodoData *models.CreateTodoData) (*models.Todo, error) {
+func (p *PostgresTodoRepo) CreateToDo(TodoData *models.CreateTodoData) (*models.Todo, error) {
 	var todo models.Todo
 	query := `
 	INSERT INTO todos(user_id, title, description)
@@ -106,7 +110,7 @@ func CreateToDo(TodoData *models.CreateTodoData) (*models.Todo, error) {
 	RETURNING id, user_id, title, description, completed, created_at;
 	`
 
-	err := DB.QueryRow(query, TodoData.User_ID, TodoData.Title, TodoData.Description).Scan(
+	err := p.DB.QueryRow(query, TodoData.User_ID, TodoData.Title, TodoData.Description).Scan(
 		&todo.ID,
 		&todo.User_ID,
 		&todo.Title,

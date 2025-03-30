@@ -6,10 +6,10 @@ import (
 	"github.com/wrtgvr/todoapi/api/handlers"
 )
 
-func RegisterUsersRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /users", handlers.GetUsers)
-	mux.HandleFunc("POST /users", handlers.CreateUser)
-	mux.HandleFunc("GET /users/", handlers.GetUser)
-	mux.HandleFunc("DELETE /users/", handlers.DeleteUser)
-	mux.HandleFunc("PATCH /users/", handlers.UpdateUser)
+func RegisterUsersRoutes(mux *http.ServeMux, handler *handlers.Handler) {
+	mux.HandleFunc("GET /users", handler.GetUsers)
+	mux.HandleFunc("POST /users", handler.CreateUser)
+	mux.HandleFunc("GET /users/", handler.GetUser)
+	mux.HandleFunc("DELETE /users/", handler.DeleteUser)
+	mux.HandleFunc("PATCH /users/", handler.UpdateUser)
 }
