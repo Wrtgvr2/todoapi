@@ -200,6 +200,15 @@ func TestUpdateUser_NotFound(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 }
 
+func TestUpdateUser_BadRequest(t *testing.T) {
+	req := httptest.NewRequest("PATCH", "/users/2", nil)
+	rec := httptest.NewRecorder()
+
+	handler.UpdateUser(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
 func TestUpdateUser_InvalidUsername(t *testing.T) {
 	userData := models.UserRequest{
 		Username: &TestUsername_BadReq,
