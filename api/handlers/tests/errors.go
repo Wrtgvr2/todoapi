@@ -3,5 +3,5 @@ package handlers_test
 import "errors"
 
 var (
-	TestInternalError = errors.New("internal server error")
+	ErrTestInternalError = errors.New("internal server error")
 )
