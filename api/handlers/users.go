@@ -4,23 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/wrtgvr/todoapi/models"
 	rep "github.com/wrtgvr/todoapi/repository"
 )
 
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
-	if idStr == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := GetIdFromUrl(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	err = h.UserRepo.DeleteUser(id)
@@ -36,15 +28,9 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
-	if idStr == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := GetIdFromUrl(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Invalid User ID", http.StatusBadRequest)
-		return
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	var updateData models.UserRequest
@@ -150,16 +136,9 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/users/")
-
-	if idStr == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := GetIdFromUrl(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Invalid User ID", http.StatusBadRequest)
-		return
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	user, err := h.UserRepo.GetUserById(id)

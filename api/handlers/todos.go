@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/wrtgvr/todoapi/models"
@@ -12,17 +11,10 @@ import (
 )
 
 func (h *Handler) UpdateTodo(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
-	if idStr == "" {
-		http.Error(w, "User ID is required", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := GetIdFromUrl(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-
 	var updateDataTodo models.UpdateTodoData
 
 	err = json.NewDecoder(r.Body).Decode(&updateDataTodo)
@@ -32,7 +24,7 @@ func (h *Handler) UpdateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.ReplaceAll(*updateDataTodo.Title, " ", "") == "" {
-		http.Error(w, "Title can't be empty", http.StatusBadRequest)
+		http.Error(w, ErrTodoTitleRequired.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -66,15 +58,9 @@ func (h *Handler) UpdateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
-	if idStr == "" {
-		http.Error(w, "Todo ID is required", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := GetIdFromUrl(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	err = h.TodoRepo.DeleteTodo(id)
@@ -91,15 +77,9 @@ func (h *Handler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetTodo(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/todos/")
-	if idStr == "" {
-		http.Error(w, "Todo ID is required", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := GetIdFromUrl(r.URL.Path)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	todo, err := h.TodoRepo.GetTodo(id)
@@ -140,7 +120,7 @@ func (h *Handler) CreateTodo(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if strings.ReplaceAll(bodyData.Title, " ", "") == "" {
-		http.Error(w, "Title can't be empty", http.StatusBadRequest)
+		http.Error(w, ErrTodoTitleRequired.Error(), http.StatusBadRequest)
 		return
 	}
 
