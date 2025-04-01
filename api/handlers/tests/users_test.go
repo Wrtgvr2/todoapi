@@ -70,7 +70,7 @@ func TestGetUser_BadRequest(t *testing.T) {
 }
 
 // DELETE
-func TestDeleteUser(t *testing.T) {
+func TestDeleteUser_Success(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/users/1", nil)
 	rec := httptest.NewRecorder()
 
@@ -98,7 +98,7 @@ func TestDeleteUser_BadRequest(t *testing.T) {
 }
 
 // POST
-func TestCreateUser(t *testing.T) {
+func TestCreateUser_Success(t *testing.T) {
 	userData := models.UserRequest{
 		Username: &TestUsername,
 		Password: &TestPassword,
@@ -157,7 +157,7 @@ func TestCreateUser_InvalidPassword(t *testing.T) {
 }
 
 // PATCH
-func TestUpdateUser(t *testing.T) {
+func TestUpdateUser_Success(t *testing.T) {
 	userData := models.UserRequest{
 		Username: &TestUsername,
 		Password: &TestPassword,
