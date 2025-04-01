@@ -16,7 +16,7 @@ func TestGetUsers(t *testing.T) {
 	req := httptest.NewRequest("GET", "/users", nil)
 	rec := httptest.NewRecorder()
 
-	handler.GetUsers(rec, req)
+	Handler.GetUsers(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -36,7 +36,7 @@ func TestGetUser_Success(t *testing.T) {
 	req := httptest.NewRequest("GET", "/users/1", nil)
 	rec := httptest.NewRecorder()
 
-	handler.GetUser(rec, req)
+	Handler.GetUser(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -55,7 +55,7 @@ func TestGetUser_NotFound(t *testing.T) {
 	req := httptest.NewRequest("GET", "/users/999", nil)
 	rec := httptest.NewRecorder()
 
-	handler.GetUser(rec, req)
+	Handler.GetUser(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 }
@@ -64,7 +64,7 @@ func TestGetUser_BadRequest(t *testing.T) {
 	req := httptest.NewRequest("GET", "/users/error", nil)
 	rec := httptest.NewRecorder()
 
-	handler.GetUser(rec, req)
+	Handler.GetUser(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
@@ -74,7 +74,7 @@ func TestDeleteUser(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/users/1", nil)
 	rec := httptest.NewRecorder()
 
-	handler.DeleteUser(rec, req)
+	Handler.DeleteUser(rec, req)
 
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 }
@@ -83,7 +83,7 @@ func TestDeleteUser_NotFound(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/users/123123", nil)
 	rec := httptest.NewRecorder()
 
-	handler.DeleteUser(rec, req)
+	Handler.DeleteUser(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 }
@@ -92,7 +92,7 @@ func TestDeleteUser_BadRequest(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/users/errerr", nil)
 	rec := httptest.NewRecorder()
 
-	handler.DeleteUser(rec, req)
+	Handler.DeleteUser(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
@@ -109,7 +109,7 @@ func TestCreateUser(t *testing.T) {
 	req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
-	handler.CreateUser(rec, req)
+	Handler.CreateUser(rec, req)
 
 	assert.Equal(t, http.StatusCreated, rec.Code)
 
@@ -135,7 +135,7 @@ func TestCreateUser_InvalidUsername(t *testing.T) {
 	req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
-	handler.CreateUser(rec, req)
+	Handler.CreateUser(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
@@ -151,7 +151,7 @@ func TestCreateUser_InvalidPassword(t *testing.T) {
 	req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
-	handler.CreateUser(rec, req)
+	Handler.CreateUser(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
@@ -168,7 +168,7 @@ func TestUpdateUser(t *testing.T) {
 	req := httptest.NewRequest("PATCH", "/users/1", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
-	handler.UpdateUser(rec, req)
+	Handler.UpdateUser(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -195,7 +195,7 @@ func TestUpdateUser_NotFound(t *testing.T) {
 	req := httptest.NewRequest("PATCH", "/users/2", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
-	handler.UpdateUser(rec, req)
+	Handler.UpdateUser(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 }
@@ -211,7 +211,7 @@ func TestUpdateUser_InvalidUsername(t *testing.T) {
 	req := httptest.NewRequest("PATCH", "/users/1", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
-	handler.UpdateUser(rec, req)
+	Handler.UpdateUser(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
@@ -227,7 +227,7 @@ func TestUpdateUser_InvalidPassword(t *testing.T) {
 	req := httptest.NewRequest("PATCH", "/users/1", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
-	handler.UpdateUser(rec, req)
+	Handler.UpdateUser(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
