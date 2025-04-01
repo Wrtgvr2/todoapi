@@ -8,13 +8,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wrtgvr/todoapi/api/handlers"
 	"github.com/wrtgvr/todoapi/models"
 )
-
-var handler = handlers.Handler{
-	UserRepo: MockUserRepo{},
-}
 
 // GET
 func TestGetUsers(t *testing.T) {
