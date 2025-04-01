@@ -124,6 +124,15 @@ func TestCreateUser_Success(t *testing.T) {
 	assert.Equal(t, expectedBody, response)
 }
 
+func TestCreateUser_NoBody(t *testing.T) {
+	req := httptest.NewRequest("POST", "/users", nil)
+	rec := httptest.NewRecorder()
+
+	handler.CreateUser(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
 func TestCreateUser_InvalidUsername(t *testing.T) {
 	userData := models.UserRequest{
 		Username: &TestUsername_BadReq,
@@ -200,7 +209,7 @@ func TestUpdateUser_NotFound(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 }
 
-func TestUpdateUser_BadRequest(t *testing.T) {
+func TestUpdateUser_NoBody(t *testing.T) {
 	req := httptest.NewRequest("PATCH", "/users/2", nil)
 	rec := httptest.NewRecorder()
 
