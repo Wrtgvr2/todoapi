@@ -8,17 +8,17 @@ import (
 type MockUserRepo struct{}
 
 var (
-	TestUsername string = "testUser"
-	TestPassword string = "TestPassword"
-	TestUserID   uint64 = 1
+	TestUsername        string = "testUser"
+	TestPassword        string = "testPassword"
+	TestUserID          uint64 = 1
+	TestUsername_BadReq string = "err"
+	TestPassword_BadReq string = "err"
 )
 
 func (m MockUserRepo) GetUsers() ([]models.UserResponse, error) {
 	return []models.UserResponse{
-		models.UserResponse{
-			ID:       TestUserID,
-			Username: TestUsername,
-		},
+		{ID: 1, Username: TestUsername},
+		{ID: 2, Username: TestUsername},
 	}, nil
 }
 
@@ -61,17 +61,14 @@ func (m MockUserRepo) GetUserById(id uint64) (*models.UserResponse, error) {
 }
 
 func (m MockUserRepo) CreateUser(userData *models.UserRequest) (*models.UserResponse, error) {
-	if *userData.Username == TestUsername && *userData.Password == TestPassword {
-		return &models.UserResponse{
-			ID:       TestUserID,
-			Username: TestUsername,
-		}, nil
-	}
-	return nil, TestInternalError
+	return &models.UserResponse{
+		ID:       TestUserID,
+		Username: *userData.Username,
+	}, nil
 }
 
 func (m MockUserRepo) UpdateUser(userData *models.User) (*models.UserResponse, error) {
-	if userData.ID == TestUserID && userData.Username == TestUsername && userData.Password == TestPassword {
+	if userData.ID == TestUserID {
 		return &models.UserResponse{
 			ID:       TestUserID,
 			Username: TestUsername,

@@ -24,15 +24,36 @@ func TestGetUsers(t *testing.T) {
 	handler.GetUsers(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+
+	expectedBody := []models.UserResponse{
+		{ID: 1, Username: TestUsername},
+		{ID: 2, Username: TestUsername},
+	}
+
+	var response []models.UserResponse
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedBody, response)
 }
 
-func TestGetUser(t *testing.T) {
+func TestGetUser_Success(t *testing.T) {
 	req := httptest.NewRequest("GET", "/users/1", nil)
 	rec := httptest.NewRecorder()
 
 	handler.GetUser(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+
+	expectedBody := models.UserResponse{
+		ID:       TestUserID,
+		Username: TestUsername,
+	}
+	var response models.UserResponse
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedBody, response)
 }
 
 func TestGetUser_NotFound(t *testing.T) {
@@ -42,6 +63,15 @@ func TestGetUser_NotFound(t *testing.T) {
 	handler.GetUser(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestGetUser_BadRequest(t *testing.T) {
+	req := httptest.NewRequest("GET", "/users/error", nil)
+	rec := httptest.NewRecorder()
+
+	handler.GetUser(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
 // DELETE
@@ -63,6 +93,15 @@ func TestDeleteUser_NotFound(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 }
 
+func TestDeleteUser_BadRequest(t *testing.T) {
+	req := httptest.NewRequest("DELETE", "/users/errerr", nil)
+	rec := httptest.NewRecorder()
+
+	handler.DeleteUser(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
 // POST
 func TestCreateUser(t *testing.T) {
 	userData := models.UserRequest{
@@ -78,12 +117,21 @@ func TestCreateUser(t *testing.T) {
 	handler.CreateUser(rec, req)
 
 	assert.Equal(t, http.StatusCreated, rec.Code)
+
+	expectedBody := models.UserResponse{
+		ID:       TestUserID,
+		Username: TestUsername,
+	}
+	var response models.UserResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedBody, response)
 }
 
 func TestCreateUser_InvalidUsername(t *testing.T) {
-	badUsername := "qwe"
 	userData := models.UserRequest{
-		Username: &badUsername,
+		Username: &TestUsername_BadReq,
 		Password: &TestPassword,
 	}
 	body, err := json.Marshal(userData)
@@ -98,10 +146,9 @@ func TestCreateUser_InvalidUsername(t *testing.T) {
 }
 
 func TestCreateUser_InvalidPassword(t *testing.T) {
-	badPassword := "qwe"
 	userData := models.UserRequest{
 		Username: &TestUsername,
-		Password: &badPassword,
+		Password: &TestPassword_BadReq,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
@@ -129,9 +176,20 @@ func TestUpdateUser(t *testing.T) {
 	handler.UpdateUser(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+
+	expectedBody := models.UserResponse{
+		ID:       TestUserID,
+		Username: TestUsername,
+	}
+
+	var response models.UserResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedBody, response)
 }
 
-func TestUpdateUser_InvalidID(t *testing.T) {
+func TestUpdateUser_NotFound(t *testing.T) {
 	userData := models.UserRequest{
 		Username: &TestUsername,
 		Password: &TestPassword,
@@ -139,7 +197,7 @@ func TestUpdateUser_InvalidID(t *testing.T) {
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
 
-	req := httptest.NewRequest("PATCH", "/users/131", bytes.NewReader(body))
+	req := httptest.NewRequest("PATCH", "/users/2", bytes.NewReader(body))
 	rec := httptest.NewRecorder()
 
 	handler.UpdateUser(rec, req)
@@ -148,9 +206,8 @@ func TestUpdateUser_InvalidID(t *testing.T) {
 }
 
 func TestUpdateUser_InvalidUsername(t *testing.T) {
-	badUsername := "qwe"
 	userData := models.UserRequest{
-		Username: &badUsername,
+		Username: &TestUsername_BadReq,
 		Password: &TestPassword,
 	}
 	body, err := json.Marshal(userData)
@@ -165,10 +222,9 @@ func TestUpdateUser_InvalidUsername(t *testing.T) {
 }
 
 func TestUpdateUser_InvalidPassword(t *testing.T) {
-	badPassword := "qwe"
 	userData := models.UserRequest{
 		Username: &TestUsername,
-		Password: &badPassword,
+		Password: &TestPassword_BadReq,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
