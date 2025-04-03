@@ -137,4 +137,8 @@ func writeLog(text, logType string) {
 	if err != nil {
 		panic(err)
 	}
+	_, err = logFile.Write([]byte("\n"))
+	if err != nil {
+		panic(err)
+	}
 }
