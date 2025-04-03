@@ -164,3 +164,23 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 }
+
+func (h *Handler) GetUserTodos(w http.ResponseWriter, r *http.Request) {
+	id, err := GetIdFromUrl(r.URL.Path)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	todo, err := h.UserRepo.GetUserTodos(id)
+	if err != nil {
+		if errors.Is(err, rep.ErrUserNotFound) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		HandleInternalError(w, err)
+		return
+	}
+
+	json.NewEncoder(w).Encode(todo)
+}

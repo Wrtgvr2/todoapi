@@ -133,3 +133,36 @@ func (p *PostgresUserRepo) GetUsers() ([]models.UserResponse, error) {
 
 	return users, nil
 }
+
+func (p *PostgresUserRepo) GetUserTodos(id uint64) ([]models.Todo, error) {
+	query := `SELECT * FROM todos WHERE user_id=$1`
+
+	rows, err := DB.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var todos []models.Todo
+
+	for rows.Next() {
+		var todo models.Todo
+		if err := rows.Scan(
+			&todo.ID,
+			&todo.User_ID,
+			&todo.Title,
+			&todo.Description,
+			&todo.Completed,
+			&todo.Created_At,
+		); err != nil {
+			return nil, err
+		}
+		todos = append(todos, todo)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return todos, nil
+}

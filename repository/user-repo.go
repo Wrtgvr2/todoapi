@@ -12,4 +12,5 @@ type UserRepo interface {
 	GetUserById(id uint64) (*models.UserResponse, error)
 	CreateUser(userData *models.UserRequest) (*models.UserResponse, error)
 	UpdateUser(userData *models.User) (*models.UserResponse, error)
+	GetUserTodos(id uint64) ([]models.Todo, error)
 }
