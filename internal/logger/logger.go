@@ -3,6 +3,7 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -14,6 +15,7 @@ var logFile *os.File
 var maxLogFiles = 5
 
 func InitLogs() {
+	initLogDir()
 	date := time.Now().Format("2006-01-02")
 	filename := fmt.Sprintf("logs/%s-log", date)
 
@@ -27,7 +29,7 @@ func InitLogs() {
 	var err error
 	logFile, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	for countLogFiles() > maxLogFiles {
@@ -38,7 +40,7 @@ func InitLogs() {
 func CloseLogs() {
 	err := logFile.Close()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
@@ -57,13 +59,23 @@ func LogError(err error) {
 	}
 }
 
+func initLogDir() {
+	if _, err := os.Stat(logsPath); !os.IsNotExist(err) {
+		return
+	}
+	err := os.Mkdir("logs", os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func getLogFileMaxSuffix() int {
 	maxSuffix := -1
 	r := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}-log(?:-(\d+))?\.txt$`)
 
 	files, err := os.ReadDir(logsPath)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	for _, file := range files {
@@ -71,7 +83,7 @@ func getLogFileMaxSuffix() int {
 		if len(match) > 1 && match[1] != "" {
 			suffix, err := strconv.Atoi(match[1])
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			if suffix > maxSuffix {
 				maxSuffix = suffix
@@ -89,7 +101,7 @@ func getLogFileMaxSuffix() int {
 func getOldestLogFilePath() string {
 	files, err := os.ReadDir(logsPath)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	var oldestFilePath string
@@ -115,7 +127,7 @@ func getOldestLogFilePath() string {
 func countLogFiles() int {
 	files, err := os.ReadDir(logsPath)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return len(files)
@@ -130,15 +142,15 @@ func writeLog(text, logType string) {
 
 	json, err := json.Marshal(logMsg)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	_, err = logFile.Write(json)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	_, err = logFile.Write([]byte("\n"))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
