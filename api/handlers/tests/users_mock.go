@@ -76,3 +76,7 @@ func (m MockUserRepo) UpdateUser(userData *models.User) (*models.UserResponse, e
 	}
 	return nil, rep.ErrUserNotFound
 }
+
+func (m MockUserRepo) GetUserTodos(id uint64) ([]models.Todo, error) {
+	return nil, nil
+}
