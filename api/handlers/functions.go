@@ -1,19 +1,23 @@
 package handlers
 
 import (
+	"regexp"
 	"strconv"
-	"strings"
 )
 
 func GetIdFromUrl(urlPath string) (uint64, error) {
-	idStr := strings.TrimPrefix(urlPath, "/users/")
+	r := regexp.MustCompile(`^\/(?:users|todos)/(\d+)(:?/todos)?`)
+	var id uint64
 
-	if idStr == "" {
-		return uint64(0), ErrUserIdRequired
-	}
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		return uint64(0), ErrInvalidUserID
+	matches := r.FindStringSubmatch(urlPath)
+	if len(matches) > 1 {
+		var err error
+		id, err = strconv.ParseUint(matches[1], 10, 64)
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		return 0, ErrInvalidUserID
 	}
 
 	return id, nil
