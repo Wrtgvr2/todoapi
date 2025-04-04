@@ -7,14 +7,6 @@ import (
 
 type MockUserRepo struct{}
 
-var (
-	TestUsername        string = "testUser"
-	TestPassword        string = "testPassword"
-	TestUserID          uint64 = 1
-	TestUsername_BadReq string = "err"
-	TestPassword_BadReq string = "err"
-)
-
 func (m MockUserRepo) GetUsers() ([]models.UserResponse, error) {
 	return []models.UserResponse{
 		{ID: 1, Username: TestUsername},
