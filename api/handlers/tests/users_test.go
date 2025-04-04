@@ -69,6 +69,43 @@ func TestGetUser_BadRequest(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
+func TestGetUserTodos_Success(t *testing.T) {
+	req := httptest.NewRequest("GET", "/users/1/todos", nil)
+	rec := httptest.NewRecorder()
+
+	handler.GetUserTodos(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	expectedBody := []models.Todo{
+		TestTodoData,
+	}
+
+	var response []models.Todo
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.Equal(t, expectedBody, response)
+}
+
+func TestGetUserTodos_NotFound(t *testing.T) {
+	req := httptest.NewRequest("GET", "/users/2/todos", nil)
+	rec := httptest.NewRecorder()
+
+	handler.GetUserTodos(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestGetUserTodos_BadRequest(t *testing.T) {
+	req := httptest.NewRequest("GET", "/users/err/todos", nil)
+	rec := httptest.NewRecorder()
+
+	handler.GetUserTodos(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
 // DELETE
 func TestDeleteUser_Success(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/users/1", nil)
