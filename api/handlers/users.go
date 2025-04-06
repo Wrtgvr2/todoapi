@@ -3,10 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/wrtgvr/todoapi/models"
 	rep "github.com/wrtgvr/todoapi/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -33,8 +35,8 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	var updateData models.UserRequest
-	err = json.NewDecoder(r.Body).Decode(&updateData)
+	var requestUserData models.UserRequest
+	err = json.NewDecoder(r.Body).Decode(&requestUserData)
 	if err != nil {
 		http.Error(w, ErrInvalidJSON.Error(), http.StatusBadRequest)
 		return
@@ -51,31 +53,39 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var updatedUserData models.User
-
 	updatedUserData.ID = id
 
-	if updateData.Username == nil {
+	if requestUserData.Username == nil {
 		updatedUserData.Username = existingUser.Username
 	} else {
-		updatedUserData.Username = *updateData.Username
+		updatedUserData.Username = *requestUserData.Username
 	}
 
-	if updateData.Password == nil {
+	if requestUserData.Password == nil {
 		updatedUserData.Password = existingUser.Password
 	} else {
-		updatedUserData.Password = *updateData.Password
+		hashBytes, err := bcrypt.GenerateFromPassword([]byte(*requestUserData.Password), bcrypt.DefaultCost)
+		if err != nil {
+			if err == bcrypt.ErrPasswordTooLong {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			HandleInternalError(w, err)
+			return
+		}
+		updatedUserData.Password = string(hashBytes)
 	}
 
-	if updateData.Username != nil && len(updatedUserData.Username) < 6 {
+	if requestUserData.Username != nil && len(updatedUserData.Username) < 6 {
 		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
 		return
 	}
-	if updateData.Password != nil && len(updatedUserData.Password) < 8 {
+	if requestUserData.Password != nil && len(updatedUserData.Password) < 8 {
 		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
 		return
 	}
 
-	userWithSameUsername, err := h.UserRepo.GetUserByUsername(*updateData.Username)
+	userWithSameUsername, err := h.UserRepo.GetUserByUsername(updatedUserData.Username)
 	if err != nil {
 		if errors.Is(err, rep.ErrUserNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -97,29 +107,46 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var newUserData models.UserRequest
+	var requestUserData models.UserRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&newUserData); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&requestUserData); err != nil {
 		http.Error(w, ErrInvalidJSON.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if *newUserData.Username == "" || len(*newUserData.Username) < 6 {
+	if *requestUserData.Username == "" || len(*requestUserData.Username) < 6 {
 		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
 		return
 	}
-	if *newUserData.Password == "" || len(*newUserData.Password) < 8 {
+	if *requestUserData.Password == "" || len(*requestUserData.Password) < 8 {
 		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
 		return
 	}
 
-	_, err := h.UserRepo.GetUserByUsername(*newUserData.Username)
+	_, err := h.UserRepo.GetUserByUsername(*requestUserData.Username)
 	if err != nil {
 		if !errors.Is(err, rep.ErrUserNotFound) {
 			HandleInternalError(w, err)
 			return
 		}
 	}
+
+	hashBytes, err := bcrypt.GenerateFromPassword([]byte(*requestUserData.Password), bcrypt.DefaultCost)
+	if err != nil {
+		if err == bcrypt.ErrPasswordTooLong {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		HandleInternalError(w, err)
+		return
+	}
+	hashedPassword := string(hashBytes)
+
+	var newUserData models.UserRequest
+	newUserData.Password = &hashedPassword
+	newUserData.Username = requestUserData.Username
+
+	fmt.Println(hashedPassword)
 
 	createdUser, err := h.UserRepo.CreateUser(&newUserData)
 	if err != nil {
