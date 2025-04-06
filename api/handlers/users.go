@@ -85,18 +85,6 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userWithSameUsername, err := h.UserRepo.GetUserByUsername(updatedUserData.Username)
-	if err != nil {
-		if errors.Is(err, rep.ErrUserNotFound) {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-	}
-	if userWithSameUsername != nil && userWithSameUsername.ID != existingUser.ID {
-		http.Error(w, "Username already taken", http.StatusConflict)
-		return
-	}
-
 	updatedUser, err := h.UserRepo.UpdateUser(&updatedUserData)
 	if err != nil {
 		HandleInternalError(w, err)
@@ -121,14 +109,6 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if *requestUserData.Password == "" || len(*requestUserData.Password) < 8 {
 		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
 		return
-	}
-
-	_, err := h.UserRepo.GetUserByUsername(*requestUserData.Username)
-	if err != nil {
-		if !errors.Is(err, rep.ErrUserNotFound) {
-			HandleInternalError(w, err)
-			return
-		}
 	}
 
 	hashBytes, err := bcrypt.GenerateFromPassword([]byte(*requestUserData.Password), bcrypt.DefaultCost)
