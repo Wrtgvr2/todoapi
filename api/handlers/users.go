@@ -179,12 +179,18 @@ func (h *Handler) GetUserTodos(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo, err := h.UserRepo.GetUserTodos(id)
+	_, err = h.UserRepo.GetUserById(id)
 	if err != nil {
 		if errors.Is(err, rep.ErrUserNotFound) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
+		HandleInternalError(w, err)
+		return
+	}
+
+	todo, err := h.UserRepo.GetUserTodos(id)
+	if err != nil {
 		HandleInternalError(w, err)
 		return
 	}
