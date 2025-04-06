@@ -76,11 +76,11 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		updatedUserData.Password = string(hashBytes)
 	}
 
-	if requestUserData.Username != nil && len(updatedUserData.Username) < 6 {
+	if requestUserData.Username != nil || len(updatedUserData.Username) < 6 {
 		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
 		return
 	}
-	if requestUserData.Password != nil && len(updatedUserData.Password) < 8 {
+	if requestUserData.Password != nil || len(updatedUserData.Password) < 8 {
 		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
 		return
 	}
