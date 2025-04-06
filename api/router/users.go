@@ -16,8 +16,11 @@ func RegisterUsersRoutes(mux *http.ServeMux, handler *handlers.Handler) {
 
 		if len(parts) == 1 {
 			handler.GetUser(w, r)
-		} else if len(parts) == 2 && parts[1] == "todos" {
-			handler.GetUserTodos(w, r)
+		} else if len(parts) == 2 {
+			switch parts[1] {
+			case "todos":
+				handler.GetUserTodos(w, r)
+			}
 		} else {
 			http.NotFound(w, r)
 		}
