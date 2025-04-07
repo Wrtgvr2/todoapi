@@ -1,11 +1,11 @@
-package errorhandler
+package errdefs
 
 import (
 	"errors"
 	"net/http"
 )
 
-func GetErrorStatusCode(w http.ResponseWriter, err error) int {
+func GetErrorStatusCode(err error) int {
 	if err == nil {
 		return 0
 	}
