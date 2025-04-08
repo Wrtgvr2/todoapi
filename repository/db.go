@@ -27,14 +27,17 @@ func OpenDatabase() error {
 	var err error
 	DB, err = sql.Open("postgres", dsn)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
 	if err := DB.Ping(); err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
 	if err := tablesInit(); err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
@@ -49,7 +52,8 @@ func tablesInit() error {
 	createTables := `
 	CREATE TABLE IF NOT EXISTS users (
 		id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-		username VARCHAR(24) NOT NULL,
+		username VARCHAR(24) NOT NULL UNIQUE,
+		displayusername VARCHAR(24),
 		password VARCHAR(60) NOT NULL
 	);
 	CREATE TABLE IF NOT EXISTS todos (

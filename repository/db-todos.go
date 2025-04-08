@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+	"github.com/wrtgvr/todoapi/internal/errdefs"
 	"github.com/wrtgvr/todoapi/models"
 )
 
@@ -25,7 +26,7 @@ func (p *PostgresTodoRepo) UpdateTodo(id uint64, updateData *models.UpdateTodoDa
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrTodoNotFound
+			return nil, errdefs.ErrTodoNotFound
 		}
 		return nil, err
 	}
@@ -39,7 +40,7 @@ func (p *PostgresTodoRepo) DeleteTodo(id uint64) error {
 	err := p.DB.QueryRow(query, id).Err()
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return ErrTodoNotFound
+			return errdefs.ErrTodoNotFound
 		}
 		return err
 	}
@@ -61,7 +62,7 @@ func (p *PostgresTodoRepo) GetTodo(id uint64) (*models.Todo, error) {
 		&todo.Created_At,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrTodoNotFound
+			return nil, errdefs.ErrTodoNotFound
 		}
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func (p *PostgresTodoRepo) GetTodos() ([]models.Todo, error) {
 	}
 	defer rows.Close()
 
-	var todos []models.Todo
+	todos := []models.Todo{}
 
 	for rows.Next() {
 		var todo models.Todo
