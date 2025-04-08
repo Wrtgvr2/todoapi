@@ -1,7 +1,11 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/wrtgvr/todoapi/app"
 	"github.com/wrtgvr/todoapi/internal/logger"
@@ -15,7 +19,17 @@ func main() {
 		logger.LogError(err)
 		return
 	}
-	defer app.CloseApp()
 
-	http.ListenAndServe(port, App.Router)
+	stopCh := make(chan os.Signal, 1)
+	signal.Notify(stopCh, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		if err := http.ListenAndServe(port, App.Router); err != nil {
+			log.Fatalf("Can't start app: %v\n", err)
+		}
+	}()
+
+	<-stopCh
+
+	app.CloseApp()
 }
