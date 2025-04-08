@@ -15,7 +15,7 @@ var (
 	ErrPasswordTooLong      = errors.New("password cannot be longer than 60 characters")
 	ErrUsernameTooShort     = errors.New("username must be at least 6 characters long")
 	ErrUsernameTooLong      = errors.New("username cannot be longer than 24 characters")
-	ErrDisallowedCharacters = errors.New("input contains disallowed characters")
+	ErrDisallowedCharacters = errors.New("disallowed characters used")
 	ErrUsernameRequired     = errors.New("username is required")
 	ErrPasswordRequired     = errors.New("password is required")
 	ErrTodoUserIdRequired   = errors.New("user id required for todo")
