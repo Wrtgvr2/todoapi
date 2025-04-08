@@ -184,7 +184,8 @@ func TestCreateTodo_NoBody(t *testing.T) {
 
 func TestCreateTodo_InvalidTitle(t *testing.T) {
 	todoData := TestTodoCreateData
-	todoData.Title = TestTodoTitle_BadReq
+	todoData.Title = &TestTodoTitle_BadReq
+
 	body, err := json.Marshal(todoData)
 	assert.NoError(t, err)
 

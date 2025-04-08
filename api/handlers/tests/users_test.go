@@ -21,8 +21,7 @@ func TestGetUsers(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	expectedBody := []models.UserResponse{
-		{ID: 1, Username: TestUsername},
-		{ID: 2, Username: TestUsername},
+		TestUserRespData,
 	}
 
 	var response []models.UserResponse
@@ -40,10 +39,8 @@ func TestGetUser_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	expectedBody := models.UserResponse{
-		ID:       TestUserID,
-		Username: TestUsername,
-	}
+	expectedBody := TestUserRespData
+
 	var response models.UserResponse
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -136,10 +133,11 @@ func TestDeleteUser_BadRequest(t *testing.T) {
 
 // POST
 func TestCreateUser_Success(t *testing.T) {
-	userData := models.UserRequest{
-		Username: &TestUsername,
-		Password: &TestPassword,
-	}
+	userData := TestUserReqData
+
+	newUsername := "MostUniqueUsername"
+	userData.Username = &newUsername
+
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
 
@@ -150,10 +148,7 @@ func TestCreateUser_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, rec.Code)
 
-	expectedBody := models.UserResponse{
-		ID:       TestUserID,
-		Username: TestUsername,
-	}
+	expectedBody := TestUserRespData
 	var response models.UserResponse
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -218,10 +213,7 @@ func TestUpdateUser_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	expectedBody := models.UserResponse{
-		ID:       TestUserID,
-		Username: TestUsername,
-	}
+	expectedBody := TestUserRespData
 
 	var response models.UserResponse
 	err = json.Unmarshal(rec.Body.Bytes(), &response)

@@ -15,10 +15,30 @@ var (
 	TestPassword_BadReq string = "err"
 )
 
+var TestUserReqData = models.UserRequest{
+	Username:        &TestUsername,
+	DisplayUsername: &TestUsername,
+	Password:        &TestPassword,
+}
+
+var TestUserRespData = models.UserResponse{
+	ID:              TestUserID,
+	Username:        TestUsername,
+	DisplayUsername: TestUsername,
+}
+
+var TestUserData = models.User{
+	ID:              TestUserID,
+	Username:        TestUsername,
+	DisplayUsername: TestUsername,
+	Password:        TestPassword,
+}
+
 // Todos
 var (
 	TestTodoID           uint64    = 1
 	TestTodoUserID       uint64    = 1
+	TestTodoUser_BadReq  uint64    = 0
 	TestTodoTitle        string    = "testtitle"
 	TestTodoTitle_BadReq string    = " "
 	TestTodoDescription  string    = "test"
@@ -33,16 +53,16 @@ var TestTodoUpdateData = models.UpdateTodoData{
 }
 
 var TestTodoCreateData = models.CreateTodoData{
-	User_ID:     TestUserID,
-	Title:       TestTodoTitle,
-	Description: &TestTodoDescription,
+	User_ID:     &TestUserID,
+	Title:       &TestTodoTitle,
+	Description: TestTodoDescription,
 }
 
 var TestTodoData = models.Todo{
 	ID:          TestTodoID,
 	User_ID:     TestTodoUserID,
 	Title:       TestTodoTitle,
-	Description: &TestTodoDescription,
-	Completed:   &TestTodoCompleted,
+	Description: TestTodoDescription,
+	Completed:   TestTodoCompleted,
 	Created_At:  TestTodoCreatedAt,
 }
