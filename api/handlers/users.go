@@ -3,27 +3,21 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
+	"github.com/wrtgvr/todoapi/internal/errdefs"
 	"github.com/wrtgvr/todoapi/models"
-	rep "github.com/wrtgvr/todoapi/repository"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := GetIdFromUrl(r.URL.Path)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if HandleError(w, err) {
+		return
 	}
 
 	err = h.UserRepo.DeleteUser(id)
-	if err != nil {
-		if errors.Is(err, rep.ErrUserNotFound) {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		HandleInternalError(w, err)
+	if HandleError(w, err) {
+		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -31,63 +25,38 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	id, err := GetIdFromUrl(r.URL.Path)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if HandleError(w, err) {
+		return
 	}
 
 	var requestUserData models.UserRequest
-	err = json.NewDecoder(r.Body).Decode(&requestUserData)
-	if err != nil {
-		http.Error(w, ErrInvalidJSON.Error(), http.StatusBadRequest)
+	err = DecodeBody(r.Body, &requestUserData)
+	if HandleError(w, err) {
 		return
 	}
 
-	existingUser, err := h.UserRepo.GetFullUser(id)
-	if err != nil {
-		if errors.Is(err, rep.ErrUserNotFound) {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		HandleInternalError(w, err)
+	actualUserData, err := h.UserRepo.GetFullUser(id)
+	if HandleError(w, err) {
 		return
 	}
 
-	var updatedUserData models.User
-	updatedUserData.ID = id
-
-	if requestUserData.Username == nil {
-		updatedUserData.Username = existingUser.Username
-	} else {
-		updatedUserData.Username = *requestUserData.Username
-	}
-
-	if requestUserData.Password == nil {
-		updatedUserData.Password = existingUser.Password
-	} else {
-		hashBytes, err := bcrypt.GenerateFromPassword([]byte(*requestUserData.Password), bcrypt.DefaultCost)
-		if err != nil {
-			if err == bcrypt.ErrPasswordTooLong {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			HandleInternalError(w, err)
-			return
-		}
-		updatedUserData.Password = string(hashBytes)
-	}
-
-	if requestUserData.Username != nil || len(updatedUserData.Username) < 6 {
-		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
-		return
-	}
-	if requestUserData.Password != nil || len(updatedUserData.Password) < 8 {
-		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
+	validatedUserData, err := ValidateAndPrepareUserData(&requestUserData, actualUserData)
+	if HandleError(w, err) {
 		return
 	}
 
-	updatedUser, err := h.UserRepo.UpdateUser(&updatedUserData)
-	if err != nil {
-		HandleInternalError(w, err)
+	userWithSameUsername, err := h.UserRepo.GetUserByUsername(validatedUserData.Username)
+	if err != nil && !errors.Is(err, errdefs.ErrUserNotFound) {
+		HandleError(w, err)
+		return
+	}
+	if userWithSameUsername != nil && userWithSameUsername.ID != validatedUserData.ID {
+		HandleError(w, errdefs.ErrUsernameTaken)
+		return
+	}
+
+	updatedUser, err := h.UserRepo.UpdateUser(validatedUserData)
+	if HandleError(w, err) {
 		return
 	}
 
@@ -97,64 +66,48 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var requestUserData models.UserRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&requestUserData); err != nil {
-		http.Error(w, ErrInvalidJSON.Error(), http.StatusBadRequest)
+	err := DecodeBody(r.Body, &requestUserData)
+	if HandleError(w, err) {
 		return
 	}
 
-	if *requestUserData.Username == "" || len(*requestUserData.Username) < 6 {
-		http.Error(w, "Username must be at least 6 characters length", http.StatusBadRequest)
-		return
-	}
-	if *requestUserData.Password == "" || len(*requestUserData.Password) < 8 {
-		http.Error(w, "Password must be at least 8 characters length", http.StatusBadRequest)
+	preparedUserData, err := ValidateAndPrepareCreateUserRequest(&requestUserData)
+	if HandleError(w, err) {
 		return
 	}
 
-	hashBytes, err := bcrypt.GenerateFromPassword([]byte(*requestUserData.Password), bcrypt.DefaultCost)
-	if err != nil {
-		if err == bcrypt.ErrPasswordTooLong {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		HandleInternalError(w, err)
+	userWithSameUsername, err := h.UserRepo.GetUserByUsername(*preparedUserData.Username)
+	if err != nil && !errors.Is(err, errdefs.ErrUserNotFound) {
+		HandleError(w, err)
 		return
 	}
-	hashedPassword := string(hashBytes)
-
-	var newUserData models.UserRequest
-	newUserData.Password = &hashedPassword
-	newUserData.Username = requestUserData.Username
-
-	fmt.Println(hashedPassword)
-
-	createdUser, err := h.UserRepo.CreateUser(&newUserData)
-	if err != nil {
-		HandleInternalError(w, err)
+	if userWithSameUsername != nil {
+		HandleError(w, errdefs.ErrUsernameTaken)
 		return
 	}
+
+	createdUser, err := h.UserRepo.CreateUser(preparedUserData)
+	if HandleError(w, err) {
+		return
+	}
+
 	json, jsonErr := json.Marshal(createdUser)
-	if jsonErr != nil {
-		HandleInternalError(w, err)
+	if HandleError(w, jsonErr) {
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write(json)
 }
 
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	id, err := GetIdFromUrl(r.URL.Path)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if HandleError(w, err) {
+		return
 	}
 
 	user, err := h.UserRepo.GetUserById(id)
-	if err != nil {
-		if errors.Is(err, rep.ErrUserNotFound) {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		HandleInternalError(w, err)
+	if HandleError(w, err) {
 		return
 	}
 
@@ -163,35 +116,26 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	res, err := h.UserRepo.GetUsers()
-	if err != nil {
-		HandleInternalError(w, err)
+	if HandleError(w, err) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 }
 
 func (h *Handler) GetUserTodos(w http.ResponseWriter, r *http.Request) {
 	id, err := GetIdFromUrl(r.URL.Path)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if HandleError(w, err) {
 		return
 	}
 
 	_, err = h.UserRepo.GetUserById(id)
-	if err != nil {
-		if errors.Is(err, rep.ErrUserNotFound) {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		HandleInternalError(w, err)
+	if HandleError(w, err) {
 		return
 	}
 
 	todo, err := h.UserRepo.GetUserTodos(id)
-	if err != nil {
-		HandleInternalError(w, err)
+	if HandleError(w, err) {
 		return
 	}
 
