@@ -21,7 +21,7 @@ func TestGetUsers(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	expectedBody := []models.UserResponse{
-		TestUserRespData,
+		testUserRespData,
 	}
 
 	var response []models.UserResponse
@@ -39,7 +39,7 @@ func TestGetUser_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	expectedBody := TestUserRespData
+	expectedBody := testUserRespData
 
 	var response models.UserResponse
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
@@ -75,7 +75,7 @@ func TestGetUserTodos_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	expectedBody := []models.Todo{
-		TestTodoData,
+		testTodoData,
 	}
 
 	var response []models.Todo
@@ -133,7 +133,7 @@ func TestDeleteUser_BadRequest(t *testing.T) {
 
 // POST
 func TestCreateUser_Success(t *testing.T) {
-	userData := TestUserReqData
+	userData := testUserReqData
 
 	newUsername := "MostUniqueUsername"
 	userData.Username = &newUsername
@@ -148,7 +148,7 @@ func TestCreateUser_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, rec.Code)
 
-	expectedBody := TestUserRespData
+	expectedBody := testUserRespData
 	var response models.UserResponse
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.NoError(t, err)
@@ -167,8 +167,8 @@ func TestCreateUser_NoBody(t *testing.T) {
 
 func TestCreateUser_InvalidUsername(t *testing.T) {
 	userData := models.UserRequest{
-		Username: &TestUsername_BadReq,
-		Password: &TestPassword,
+		Username: &testUsername_BadReq,
+		Password: &testPassword,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
@@ -183,8 +183,8 @@ func TestCreateUser_InvalidUsername(t *testing.T) {
 
 func TestCreateUser_InvalidPassword(t *testing.T) {
 	userData := models.UserRequest{
-		Username: &TestUsername,
-		Password: &TestPassword_BadReq,
+		Username: &testUsername,
+		Password: &testPassword_BadReq,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
@@ -200,8 +200,8 @@ func TestCreateUser_InvalidPassword(t *testing.T) {
 // PATCH
 func TestUpdateUser_Success(t *testing.T) {
 	userData := models.UserRequest{
-		Username: &TestUsername,
-		Password: &TestPassword,
+		Username: &testUsername,
+		Password: &testPassword,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
@@ -213,7 +213,7 @@ func TestUpdateUser_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	expectedBody := TestUserRespData
+	expectedBody := testUserRespData
 
 	var response models.UserResponse
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
@@ -224,8 +224,8 @@ func TestUpdateUser_Success(t *testing.T) {
 
 func TestUpdateUser_NotFound(t *testing.T) {
 	userData := models.UserRequest{
-		Username: &TestUsername,
-		Password: &TestPassword,
+		Username: &testUsername,
+		Password: &testPassword,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
@@ -249,8 +249,8 @@ func TestUpdateUser_NoBody(t *testing.T) {
 
 func TestUpdateUser_InvalidUsername(t *testing.T) {
 	userData := models.UserRequest{
-		Username: &TestUsername_BadReq,
-		Password: &TestPassword,
+		Username: &testUsername_BadReq,
+		Password: &testPassword,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)
@@ -265,8 +265,8 @@ func TestUpdateUser_InvalidUsername(t *testing.T) {
 
 func TestUpdateUser_InvalidPassword(t *testing.T) {
 	userData := models.UserRequest{
-		Username: &TestUsername,
-		Password: &TestPassword_BadReq,
+		Username: &testUsername,
+		Password: &testPassword_BadReq,
 	}
 	body, err := json.Marshal(userData)
 	assert.NoError(t, err)

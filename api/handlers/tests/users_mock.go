@@ -9,53 +9,53 @@ type MockUserRepo struct{}
 
 func (m MockUserRepo) GetUsers() ([]models.UserResponse, error) {
 	return []models.UserResponse{
-		TestUserRespData,
+		testUserRespData,
 	}, nil
 }
 
 func (m MockUserRepo) DeleteUser(id uint64) error {
-	if id == TestUserID {
+	if id == testUserID {
 		return nil
 	}
 	return errdefs.ErrUserNotFound
 }
 
 func (m MockUserRepo) GetFullUser(id uint64) (*models.User, error) {
-	if id == TestUserID {
-		return &TestUserData, nil
+	if id == testUserID {
+		return &testUserData, nil
 	}
 	return nil, errdefs.ErrUserNotFound
 }
 
 func (m MockUserRepo) GetUserByUsername(username string) (*models.UserResponse, error) {
-	if username == TestUsername {
-		return &TestUserRespData, nil
+	if username == testUsername {
+		return &testUserRespData, nil
 	}
 	return nil, errdefs.ErrUserNotFound
 }
 
 func (m MockUserRepo) GetUserById(id uint64) (*models.UserResponse, error) {
-	if id == TestUserID {
-		return &TestUserRespData, nil
+	if id == testUserID {
+		return &testUserRespData, nil
 	}
 	return nil, errdefs.ErrUserNotFound
 }
 
 func (m MockUserRepo) CreateUser(userData *models.UserRequest) (*models.UserResponse, error) {
-	return &TestUserRespData, nil
+	return &testUserRespData, nil
 }
 
 func (m MockUserRepo) UpdateUser(userData *models.User) (*models.UserResponse, error) {
-	if userData.ID == TestUserID {
-		return &TestUserRespData, nil
+	if userData.ID == testUserID {
+		return &testUserRespData, nil
 	}
 	return nil, errdefs.ErrUserNotFound
 }
 
 func (m MockUserRepo) GetUserTodos(id uint64) ([]models.Todo, error) {
-	if id == TestUserID {
+	if id == testUserID {
 		return []models.Todo{
-			TestTodoData,
+			testTodoData,
 		}, nil
 	}
 	return nil, errdefs.ErrUserNotFound

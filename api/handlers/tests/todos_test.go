@@ -22,7 +22,7 @@ func TestGetTodos(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	expectedBody := []models.Todo{
-		TestTodoData,
+		testTodoData,
 	}
 
 	var response []models.Todo
@@ -40,7 +40,7 @@ func TestGetTodo_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	expectedBody := TestTodoData
+	expectedBody := testTodoData
 
 	var response models.Todo
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
@@ -97,7 +97,7 @@ func TestDeleteTodo_BadRequest(t *testing.T) {
 
 // PATCH
 func TestUpdateTodo_Success(t *testing.T) {
-	body, err := json.Marshal(TestTodoUpdateData)
+	body, err := json.Marshal(testTodoUpdateData)
 	assert.NoError(t, err)
 
 	req := httptest.NewRequest("PATCH", "/todos/1", bytes.NewReader(body))
@@ -107,7 +107,7 @@ func TestUpdateTodo_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	expectedBody := TestTodoData
+	expectedBody := testTodoData
 
 	var response models.Todo
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
@@ -117,7 +117,7 @@ func TestUpdateTodo_Success(t *testing.T) {
 }
 
 func TestUpdateTodo_NotFound(t *testing.T) {
-	body, err := json.Marshal(TestTodoUpdateData)
+	body, err := json.Marshal(testTodoUpdateData)
 	assert.NoError(t, err)
 
 	req := httptest.NewRequest("PATCH", "/todos/2", bytes.NewReader(body))
@@ -138,8 +138,8 @@ func TestUpdateTodo_NoBody(t *testing.T) {
 }
 
 func TestUpdateTodo_InvalidTitle(t *testing.T) {
-	todoUpdateData := TestTodoUpdateData
-	todoUpdateData.Title = &TestTodoTitle_BadReq
+	todoUpdateData := testTodoUpdateData
+	todoUpdateData.Title = &testTodoTitle_BadReq
 	body, err := json.Marshal(todoUpdateData)
 	assert.NoError(t, err)
 
@@ -153,7 +153,7 @@ func TestUpdateTodo_InvalidTitle(t *testing.T) {
 
 // POST
 func TestCreateTodo_Success(t *testing.T) {
-	todoData := TestTodoCreateData
+	todoData := testTodoCreateData
 	body, err := json.Marshal(todoData)
 	assert.NoError(t, err)
 
@@ -164,7 +164,7 @@ func TestCreateTodo_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, rec.Code)
 
-	expectedBody := TestTodoData
+	expectedBody := testTodoData
 
 	var response models.Todo
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
@@ -183,8 +183,8 @@ func TestCreateTodo_NoBody(t *testing.T) {
 }
 
 func TestCreateTodo_InvalidTitle(t *testing.T) {
-	todoData := TestTodoCreateData
-	todoData.Title = &TestTodoTitle_BadReq
+	todoData := testTodoCreateData
+	todoData.Title = &testTodoTitle_BadReq
 
 	body, err := json.Marshal(todoData)
 	assert.NoError(t, err)
